@@ -1,6 +1,7 @@
+# https://registry.terraform.io/providers/hashicorp/tfe/latest/docs
 terraform {
   backend "remote" {
-    hostname     = "stackweaver.truyens.pro"
+    hostname     = "localhost:8022"
     organization = "default"
 
     workspaces {
