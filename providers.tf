@@ -5,7 +5,6 @@ terraform {
     organization = "mike"
     # token = "<YOUR_TOKEN>"
     token = ""
-
     workspaces {
       name = "mike"
     }

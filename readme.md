@@ -57,6 +57,9 @@ Expected response: JSON with organization data
 
 ### 2. Test Terraform Init
 
+> [!NOTE]
+> set `export TF_LOG=DEBUG` for full debug logging
+
 ```bash
 # Set the token
 export TFE_TOKEN=""
