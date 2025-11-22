@@ -8,7 +8,6 @@ terraform {
     workspaces {
       name = "mike"
     }
-
   }
 
   required_providers {
@@ -20,11 +19,12 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.0"
     }
+#    aws = {
+#      source  = "hashicorp/aws"
+#      version = ">=6.0.0,<7.0.0"
+#    }
   }
-#   aws = {
-#     source  = "hashicorp/aws"
-#     version = ">=6.0.0,<7.0.0"
-#   }
+
 }
 
 # provider "aws" {
