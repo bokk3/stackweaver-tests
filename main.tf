@@ -7,38 +7,38 @@ resource "random_id" "server" {
 # This allows testing real-time polling and status updates during apply
 
 resource "time_sleep" "resource_1" {
-  create_duration = "20s"
+  create_duration = "5s"
 }
 
 resource "null_resource" "resource_1" {
   depends_on = [time_sleep.resource_1]
   
   provisioner "local-exec" {
-    command = "echo 'Resource 1 created after 20 seconds'"
+    command = "echo 'Resource 1 created'"
   }
 }
 
 resource "time_sleep" "resource_2" {
-  create_duration = "20s"
+  create_duration = "10s"
 }
 
 resource "null_resource" "resource_2" {
   depends_on = [time_sleep.resource_2]
   
   provisioner "local-exec" {
-    command = "echo 'Resource 2 created after 20 seconds'"
+    command = "echo 'Resource 2 created'"
   }
 }
 
 resource "time_sleep" "resource_3" {
-  create_duration = "20s"
+  create_duration = "15"
 }
 
 resource "null_resource" "resource_3" {
   depends_on = [time_sleep.resource_3]
   
   provisioner "local-exec" {
-    command = "echo 'Resource 3 created after 20 seconds'"
+    command = "echo 'Resource 3 created'"
   }
 }
 
@@ -50,81 +50,12 @@ resource "null_resource" "resource_4" {
   depends_on = [time_sleep.resource_4]
   
   provisioner "local-exec" {
-    command = "echo 'Resource 4 created after 20 seconds'"
+    command = "echo 'Resource 4 created'"
   }
 }
 
-resource "time_sleep" "resource_5" {
-  create_duration = "20s"
-}
 
-resource "null_resource" "resource_5" {
-  depends_on = [time_sleep.resource_5]
-  
-  provisioner "local-exec" {
-    command = "echo 'Resource 5 created after 20 seconds'"
-  }
-}
 
-resource "time_sleep" "resource_6" {
-  create_duration = "20s"
-}
-
-resource "null_resource" "resource_6" {
-  depends_on = [time_sleep.resource_6]
-  
-  provisioner "local-exec" {
-    command = "echo 'Resource 6 created after 20 seconds'"
-  }
-}
-
-resource "time_sleep" "resource_7" {
-  create_duration = "20s"
-}
-
-resource "null_resource" "resource_7" {
-  depends_on = [time_sleep.resource_7]
-  
-  provisioner "local-exec" {
-    command = "echo 'Resource 7 created after 20 seconds'"
-  }
-}
-
-resource "time_sleep" "resource_8" {
-  create_duration = "20s"
-}
-
-resource "null_resource" "resource_8" {
-  depends_on = [time_sleep.resource_8]
-  
-  provisioner "local-exec" {
-    command = "echo 'Resource 8 created after 20 seconds'"
-  }
-}
-
-resource "time_sleep" "resource_9" {
-  create_duration = "20s"
-}
-
-resource "null_resource" "resource_9" {
-  depends_on = [time_sleep.resource_9]
-  
-  provisioner "local-exec" {
-    command = "echo 'Resource 9 created after 20 seconds'"
-  }
-}
-
-resource "time_sleep" "resource_10" {
-  create_duration = "20s"
-}
-
-resource "null_resource" "resource_10" {
-  depends_on = [time_sleep.resource_10]
-  
-  provisioner "local-exec" {
-    command = "echo 'Resource 10 created after 20 seconds'"
-  }
-}
 
 # Original server resource (kept for compatibility)
 resource "null_resource" "server" {
