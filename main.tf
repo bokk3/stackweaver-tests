@@ -75,3 +75,22 @@ resource "null_resource" "server" {
     command = "echo 'Destroying server ${self.triggers.server_id}'"
   }
 }
+
+# Deprecated resource for testing deprecation warnings
+# Using AWS instance with deprecated associate_public_ip_address attribute
+# This will generate a deprecation warning: "Warning: Argument is deprecated"
+# The associate_public_ip_address attribute is deprecated in favor of network_interface blocks
+resource "aws_instance" "deprecated_test" {
+  ami           = "ami-0c55b159cbfafe1f0" # Example AMI - replace with valid AMI for your region
+  instance_type = "t2.micro"
+
+  # DEPRECATED: This attribute is deprecated and will generate a warning
+  # Use network_interface blocks instead
+  associate_public_ip_address = true
+
+  tags = {
+    Name        = "deprecated-test-instance"
+    Purpose     = "Testing deprecation warnings in StackWeaver"
+    Environment = "test"
+  }
+}
