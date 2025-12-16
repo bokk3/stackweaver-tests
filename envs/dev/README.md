@@ -20,3 +20,4 @@ The `aws_instance` resource uses the deprecated `associate_public_ip_address` at
 3. Verify that deprecation warnings appear in the warnings banner
 4. Verify that deprecation warnings have orange styling (vs yellow for regular warnings)
 
+
