@@ -6,7 +6,7 @@ resource "proxmox_virtual_environment_hosts" "test_entry" {
   node_name = "test-node"
   entry {
     address  = "192.168.1.100"
-    hostname = ["test-terraform.local"]
+    hostnames = ["test-terraform.local"]
   }
 }
 
