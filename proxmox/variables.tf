@@ -15,3 +15,8 @@ variable "proxmox_insecure" {
   default     = true
 }
 
+variable "proxmox_node_name" {
+  description = "Proxmox node name to create resources on"
+  type        = string
+}
+
