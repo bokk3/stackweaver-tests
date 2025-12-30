@@ -13,3 +13,4 @@ provider "proxmox" {
   password  = var.proxmox_password
   insecure  = var.proxmox_insecure
 }
+
