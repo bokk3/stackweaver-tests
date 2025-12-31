@@ -1,15 +1,27 @@
 # Simple data source to test Proxmox connectivity
 data "proxmox_virtual_environment_version" "version" {}
 
-# Test resource: Add an APT repository to a Proxmox node
-# This doesn't require any VMs to be present
-resource "proxmox_virtual_environment_apt_repository" "test_repo" {
-  enabled   = true
-  file_path = "/etc/apt/sources.list.d/test-terraform.list"
-  index     = 0
-  node      = var.node_name
+# Download an ISO file to the local datastore
+# This resource downloads files from a URL to a Proxmox datastore
+# The datastore must have at least 10GB free space
+# Reference: https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_download_file
+resource "proxmox_virtual_environment_download_file" "test_iso" {
+  content_type = "iso"
+  datastore_id = "local"
+  node_name    = var.node_name
+  url          = var.iso_url
+  file_name    = var.iso_filename
 
-  content = <<-EOT
-    deb http://deb.debian.org/debian bookworm main
-  EOT
+  # Optional: Verify the download (set to true to verify checksums if available)
+  verify = false
+}
+
+# Test resource: Create an ACL (Access Control List) for testing
+# This resource manages permissions for users or groups on specific paths
+# Reference: https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_acl
+resource "proxmox_virtual_environment_acl" "test_acl" {
+  path      = var.acl_path
+  roles     = var.acl_roles
+  users     = var.acl_users
+  propagate = var.acl_propagate
 }
