@@ -4,16 +4,17 @@ variable "node_name" {
   default     = "pve"
 }
 
+# this url changes each time there is a new stable so go to https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/ and copy the link from there if the one provided no longer works
 variable "iso_url" {
   description = "URL of the ISO file to download"
   type        = string
-  default     = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.9.0-amd64-netinst.iso"
+  default     = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.2.0-amd64-netinst.iso"
 }
 
 variable "iso_filename" {
   description = "Filename for the downloaded ISO"
   type        = string
-  default     = "debian-12.9.0-amd64-netinst.iso"
+  default     = "debian-13.2.0-amd64-netinst.iso"
 }
 
 variable "acl_path" {
