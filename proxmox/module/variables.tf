@@ -22,16 +22,16 @@ variable "acl_path" {
   default     = "/"
 }
 
-variable "acl_roles" {
-  description = "List of roles to assign in the ACL"
-  type        = list(string)
-  default     = ["PVEAdmin"]
+variable "acl_role_id" {
+  description = "Role ID to assign in the ACL (e.g., Administrator, PVEAdmin)"
+  type        = string
+  default     = "PVEAdmin"
 }
 
-variable "acl_users" {
-  description = "List of users to assign the roles to (format: user@realm, e.g., root@pam)"
-  type        = list(string)
-  default     = ["root@pam"]
+variable "acl_user_id" {
+  description = "User ID to assign the role to (format: user@realm, e.g., root@pam)"
+  type        = string
+  default     = "root@pam"
 }
 
 variable "acl_propagate" {

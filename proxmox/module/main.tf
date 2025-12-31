@@ -21,7 +21,7 @@ resource "proxmox_virtual_environment_download_file" "test_iso" {
 # Reference: https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_acl
 resource "proxmox_virtual_environment_acl" "test_acl" {
   path      = var.acl_path
-  roles     = var.acl_roles
-  users     = var.acl_users
+  role_id   = var.acl_role_id
+  user_id   = var.acl_user_id
   propagate = var.acl_propagate
 }
