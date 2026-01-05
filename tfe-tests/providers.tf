@@ -15,3 +15,8 @@ terraform {
     }
   }
 }
+
+provider "tfe" {
+  hostname = "stackweaver.vhco.pro"
+  token    = var.stackweaver_token
+}
