@@ -1,0 +1,142 @@
+---
+# Ansible playbook for installing Elastic Stack on Arch Linux
+# Installs Elasticsearch, Logstash, and Kibana from AUR using yay
+
+- name: Install Elastic Stack on Arch Linux
+  hosts: all
+  gather_facts: true
+  become: true
+  
+  vars:
+    elasticsearch_version: "8"  # Optional: specify version or use latest
+    logstash_version: "8"        # Optional: specify version or use latest
+    kibana_version: "8"          # Optional: specify version or use latest
+    aur_user: "aur"              # User to use for AUR builds (non-root)
+    
+  tasks:
+    - name: Check if running on Arch Linux
+      ansible.builtin.fail:
+        msg: "This playbook is designed for Arch Linux only"
+      when: ansible_distribution != "Archlinux"
+      
+    - name: Check if yay is installed
+      ansible.builtin.command: which yay
+      register: yay_check
+      changed_when: false
+      failed_when: false
+      
+    - name: Install base-devel and git (required for AUR)
+      ansible.builtin.pacman:
+        name:
+          - base-devel
+          - git
+        state: present
+        update_cache: yes
+      when: yay_check.rc != 0
+      
+    - name: Create AUR build user if it doesn't exist
+      ansible.builtin.user:
+        name: "{{ aur_user }}"
+        state: present
+        create_home: yes
+        shell: /bin/bash
+        groups: wheel
+        append: yes
+      when: yay_check.rc != 0
+      
+    - name: Install yay from AUR
+      ansible.builtin.shell: |
+        cd /tmp
+        rm -rf yay-bin
+        git clone https://aur.archlinux.org/yay-bin.git
+        chown -R {{ aur_user }}:{{ aur_user }} yay-bin
+        cd yay-bin
+        sudo -u {{ aur_user }} makepkg -si --noconfirm
+        cd ..
+        rm -rf yay-bin
+      args:
+        creates: /usr/bin/yay
+      when: yay_check.rc != 0
+      
+    - name: Verify yay installation
+      ansible.builtin.command: yay --version
+      register: yay_version
+      changed_when: false
+      
+    - name: Display yay version
+      ansible.builtin.debug:
+        msg: "yay version: {{ yay_version.stdout }}"
+        
+    - name: Update AUR database
+      ansible.builtin.shell: yay -Sy --noconfirm
+      changed_when: false
+      
+    - name: Check if Elasticsearch is installed
+      ansible.builtin.command: pacman -Q elasticsearch 2>/dev/null || pacman -Q elasticsearch-bin 2>/dev/null
+      register: elasticsearch_installed
+      changed_when: false
+      failed_when: false
+      
+    - name: Install Elasticsearch from AUR
+      ansible.builtin.shell: |
+        yay -S --noconfirm --needed elasticsearch-bin
+      become_user: "{{ aur_user }}"
+      environment:
+        HOME: "/home/{{ aur_user }}"
+      when: elasticsearch_installed.rc != 0
+      
+    - name: Check if Logstash is installed
+      ansible.builtin.command: pacman -Q logstash 2>/dev/null || pacman -Q logstash-bin 2>/dev/null
+      register: logstash_installed
+      changed_when: false
+      failed_when: false
+      
+    - name: Install Logstash from AUR
+      ansible.builtin.shell: |
+        yay -S --noconfirm --needed logstash-bin
+      become_user: "{{ aur_user }}"
+      environment:
+        HOME: "/home/{{ aur_user }}"
+      when: logstash_installed.rc != 0
+      
+    - name: Check if Kibana is installed
+      ansible.builtin.command: pacman -Q kibana 2>/dev/null || pacman -Q kibana-bin 2>/dev/null
+      register: kibana_installed
+      changed_when: false
+      failed_when: false
+      
+    - name: Install Kibana from AUR
+      ansible.builtin.shell: |
+        yay -S --noconfirm --needed kibana-bin
+      become_user: "{{ aur_user }}"
+      environment:
+        HOME: "/home/{{ aur_user }}"
+      when: kibana_installed.rc != 0
+      
+    - name: Verify Elastic Stack packages are installed
+      ansible.builtin.pacman:
+        name: "{{ item }}"
+        state: present
+      register: package_check
+      failed_when: false
+      loop:
+        - elasticsearch-bin
+        - logstash-bin
+        - kibana-bin
+      changed_when: false
+      
+    - name: Display installed Elastic Stack packages
+      ansible.builtin.debug:
+        msg: |
+          Elastic Stack installation complete!
+          
+          Installed packages:
+          {% for item in package_check.results %}
+          - {{ item.item }}: {{ 'installed' if item.rc == 0 else 'not found' }}
+          {% endfor %}
+          
+          Next steps:
+          1. Enable services: systemctl enable --now elasticsearch logstash kibana
+          2. Configure services as needed in /etc/elasticsearch/, /etc/logstash/, /etc/kibana/
+          3. Access Kibana at http://localhost:5601 (after starting services)
+
