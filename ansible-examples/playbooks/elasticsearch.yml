@@ -6,9 +6,9 @@
   hosts: all
   gather_facts: false  # Disable initially to allow Python installation if needed
   become: true
-  # Note: This playbook requires sudo password. 
-  # Provide it via: ansible-playbook ... --ask-become-pass
-  # Or set ansible_become_password in inventory/vault
+  become_method: sudo
+  # Note: Requires sudo access. If sysadmin has passwordless sudo (NOPASSWD),
+  # configure ansible_become_password="" in inventory. Otherwise provide password.
   
   vars:
     elasticsearch_version: "8"  # Optional: specify version or use latest
