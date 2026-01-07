@@ -50,10 +50,19 @@
         rm -rf yay-bin
         git clone https://aur.archlinux.org/yay-bin.git
         chown -R {{ aur_user }}:{{ aur_user }} yay-bin
-        cd yay-bin
-        sudo -u {{ aur_user }} makepkg -si --noconfirm
+      args:
+        creates: /usr/bin/yay
+      when: yay_check.rc != 0
+      
+    - name: Build and install yay package
+      ansible.builtin.shell: |
+        cd /tmp/yay-bin
+        makepkg -si --noconfirm
         cd ..
         rm -rf yay-bin
+      become_user: "{{ aur_user }}"
+      environment:
+        HOME: "/home/{{ aur_user }}"
       args:
         creates: /usr/bin/yay
       when: yay_check.rc != 0
