@@ -9,7 +9,7 @@ resource "tfe_team" "test_team" {
 
 // https://registry.terraform.io/providers/hashicorp/tfe/latest/docs/data-sources/workspace
 data "tfe_workspace" "test" {
-  name         = "stackweaver-tfe-tests"
+  name         = "stackweaver-tests-tfe-provider"
   organization = var.organization
 }
 

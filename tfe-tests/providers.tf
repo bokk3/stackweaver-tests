@@ -4,7 +4,7 @@ terraform {
     organization = "main"
     token = var.stackweaver_token
     workspaces {
-      name = "tfe-tests"
+      name = "ws-1q0HQPrGm4Yf1q0H"   # check why this did not error when the workspace did not exist
     }
   }
 
