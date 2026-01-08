@@ -103,6 +103,6 @@ resource "tfe_team_organization_members" "test_team_members" {
   team_id = tfe_team.test_team.id
 
   organization_membership_ids = [
-    tfe_organization_membership.test_member_2.id,
+    tfe_organization_membership.test_member_1.id,
   ]
 }
