@@ -26,12 +26,16 @@
       failed_when: false
       become: false  # This check doesn't need sudo
       
-    # Install Python if needed - requires sudo
+    # Install Python if needed
+    # Use explicit sudo in command since raw module with become can be problematic
+    # The sysadmin user should have passwordless sudo (NOPASSWD)
     - name: Install Python if not found
-      ansible.builtin.raw: pacman -Sy --noconfirm python
+      ansible.builtin.raw: sudo -n pacman -Sy --noconfirm python
       when: "'NOT_FOUND' in python_check.stdout"
       changed_when: "'NOT_FOUND' in python_check.stdout"
-      become: true  # pacman requires root/sudo
+      become: false  # Use explicit sudo -n (non-interactive) in command
+      # Note: -n flag makes sudo non-interactive (fails if password required)
+      # If this fails, check that sysadmin has NOPASSWD in sudoers
       
     # Gather facts after Python is available
     - name: Gather facts after Python is available
