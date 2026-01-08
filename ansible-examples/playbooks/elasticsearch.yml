@@ -18,19 +18,25 @@
     
   pre_tasks:
     # Ensure Python is installed (raw module doesn't require Python on target)
+    # Check if Python exists - doesn't need sudo
     - name: Check if Python is available
       ansible.builtin.raw: command -v python || command -v python3 || echo "NOT_FOUND"
       register: python_check
       changed_when: false
       failed_when: false
+      become: false  # This check doesn't need sudo
       
+    # Install Python if needed - requires sudo
     - name: Install Python if not found
       ansible.builtin.raw: pacman -Sy --noconfirm python
       when: "'NOT_FOUND' in python_check.stdout"
       changed_when: "'NOT_FOUND' in python_check.stdout"
+      become: true  # pacman requires root/sudo
       
+    # Gather facts after Python is available
     - name: Gather facts after Python is available
       ansible.builtin.setup:
+      become: true  # Facts gathering might need sudo for some checks
       
   tasks:
     - name: Check if running on Arch Linux
