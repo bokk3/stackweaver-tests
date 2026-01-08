@@ -18,19 +18,47 @@
     
   pre_tasks:
     # Ensure Python is installed (raw module doesn't require Python on target)
+    # Check if Python exists - doesn't need sudo
     - name: Check if Python is available
       ansible.builtin.raw: command -v python || command -v python3 || echo "NOT_FOUND"
       register: python_check
       changed_when: false
       failed_when: false
+      become: false  # This check doesn't need sudo
       
+    # Install Python if needed
+    # Note: This requires sudo password or passwordless sudo (NOPASSWD)
+    # If sudo requires password, ensure ansible_become_password is set in inventory
+    # or configure passwordless sudo on the target host
     - name: Install Python if not found
       ansible.builtin.raw: pacman -Sy --noconfirm python
       when: "'NOT_FOUND' in python_check.stdout"
       changed_when: "'NOT_FOUND' in python_check.stdout"
+      become: true  # Use Ansible's become mechanism
+      become_method: sudo
+      register: python_install
       
+    - name: Display Python installation result
+      ansible.builtin.debug:
+        msg: |
+          Python check result: {{ python_check.stdout }}
+          {% if python_check.stdout == 'NOT_FOUND' %}
+          Python was installed successfully (exit code: {{ python_install.rc | default('N/A') }})
+          {% else %}
+          Python already available
+          {% endif %}
+      
+    # Verify Python is now available
+    - name: Verify Python installation
+      ansible.builtin.raw: command -v python || command -v python3
+      register: python_verify
+      changed_when: false
+      become: false
+      
+    # Gather facts after Python is available
     - name: Gather facts after Python is available
       ansible.builtin.setup:
+      become: true  # Facts gathering might need sudo for some checks
       
   tasks:
     - name: Check if running on Arch Linux
