@@ -209,9 +209,10 @@
       changed_when: false
       failed_when: false
       
-    - name: Fix Kibana PKGBUILD before installation
-      ansible.builtin.shell:
-        cmd: |
+    - name: Create script to fix Kibana PKGBUILD
+      ansible.builtin.copy:
+        content: |
+          #!/bin/bash
           set -e
           cd /tmp
           rm -rf kibana-bin-fix
@@ -219,38 +220,40 @@
           cd kibana-bin-fix
           if grep -q "node_version_validator.js" PKGBUILD; then
             cp PKGBUILD PKGBUILD.bak
-            sed -i '/node_version_validator\.js/s/^[^#]/# &/' PKGBUILD
+            sed -i 's/^\(.*node_version_validator\.js.*\)$/# \1/' PKGBUILD
             echo "Fixed PKGBUILD: Commented out problematic sed line"
           else
             echo "No node_version_validator.js reference found"
           fi
+        dest: /tmp/fix-kibana-pkgbuild.sh
+        mode: '0755'
+      become: false
+      when: kibana_installed.rc != 0
+      
+    - name: Fix Kibana PKGBUILD before installation
+      ansible.builtin.command: /tmp/fix-kibana-pkgbuild.sh
       become: false
       when: kibana_installed.rc != 0
       register: kibana_pkgbuild_fix
       changed_when: false
       
     - name: Install Kibana from AUR (with fixed PKGBUILD)
-      ansible.builtin.shell: |
-        set -o pipefail
-        cd /tmp/kibana-bin-fix
-        
-        # Build and install using the fixed PKGBUILD
-        makepkg -si --noconfirm 2>&1 | tee /tmp/yay-kibana.log
-        exit_code=${PIPESTATUS[0]}
-        
-        if [ $exit_code -ne 0 ]; then
-          echo "=========================================="
-          echo "Kibana installation failed with exit code: $exit_code"
-          echo "Full error log:"
-          cat /tmp/yay-kibana.log
-          echo "=========================================="
-        fi
-        
-        # Cleanup
-        cd /tmp
-        rm -rf kibana-bin-fix
-        
-        exit $exit_code
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          cd /tmp/kibana-bin-fix
+          makepkg -si --noconfirm 2>&1 | tee /tmp/yay-kibana.log
+          exit_code=${PIPESTATUS[0]}
+          if [ $exit_code -ne 0 ]; then
+            echo "=========================================="
+            echo "Kibana installation failed with exit code: $exit_code"
+            echo "Full error log:"
+            cat /tmp/yay-kibana.log
+            echo "=========================================="
+          fi
+          cd /tmp
+          rm -rf kibana-bin-fix /tmp/fix-kibana-pkgbuild.sh
+          exit $exit_code
       # Run as sysadmin (has passwordless sudo), not root/aur_user
       become: false
       async: 3600  # 60 minutes timeout
