@@ -210,26 +210,20 @@
       failed_when: false
       
     - name: Fix Kibana PKGBUILD before installation
-      ansible.builtin.shell: |
-        # Clone the AUR package to fix the PKGBUILD bug
-        cd /tmp
-        rm -rf kibana-bin-fix
-        git clone https://aur.archlinux.org/kibana-bin.git kibana-bin-fix
-        cd kibana-bin-fix
-        
-        # Fix the PKGBUILD: Comment out the problematic sed line
-        # The PKGBUILD tries to modify src/setup_node_env/node_version_validator.js
-        # which doesn't exist in Kibana 9.2.3
-        # Simple fix: comment out any line containing node_version_validator.js
-        if grep -q "node_version_validator.js" PKGBUILD; then
-          # Backup original
-          cp PKGBUILD PKGBUILD.bak
-          # Comment out problematic lines
-          sed -i '/node_version_validator\.js/s/^[^#]/# &/' PKGBUILD
-          echo "Fixed: Commented out problematic sed line for node_version_validator.js"
-        else
-          echo "No node_version_validator.js reference found in PKGBUILD"
-        fi
+      ansible.builtin.shell:
+        cmd: |
+          set -e
+          cd /tmp
+          rm -rf kibana-bin-fix
+          git clone https://aur.archlinux.org/kibana-bin.git kibana-bin-fix
+          cd kibana-bin-fix
+          if grep -q "node_version_validator.js" PKGBUILD; then
+            cp PKGBUILD PKGBUILD.bak
+            sed -i '/node_version_validator\.js/s/^[^#]/# &/' PKGBUILD
+            echo "Fixed PKGBUILD: Commented out problematic sed line"
+          else
+            echo "No node_version_validator.js reference found"
+          fi
       become: false
       when: kibana_installed.rc != 0
       register: kibana_pkgbuild_fix
