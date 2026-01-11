@@ -1,0 +1,112 @@
+---
+# Ansible playbook to verify Elastic Stack services are running
+# Used in workflow templates to verify deployment success
+
+- name: Verify Elastic Stack Services
+  hosts: all
+  gather_facts: false
+  become: true
+  become_method: sudo
+  
+  vars:
+    check_elasticsearch: true
+    check_logstash: true
+    check_kibana: false  # Known issue with Kibana installation
+  
+  tasks:
+    - name: Check if Elasticsearch is installed
+      ansible.builtin.command: pacman -Q elasticsearch-bin 2>/dev/null || pacman -Q elasticsearch 2>/dev/null
+      register: elasticsearch_installed
+      changed_when: false
+      failed_when: false
+      when: check_elasticsearch | default(true)
+    
+    - name: Verify Elasticsearch service status
+      ansible.builtin.systemd:
+        name: elasticsearch
+        state: started
+      register: elasticsearch_status
+      when: 
+        - check_elasticsearch | default(true)
+        - elasticsearch_installed.rc == 0
+    
+    - name: Display Elasticsearch status
+      ansible.builtin.debug:
+        msg: |
+          Elasticsearch: {% if elasticsearch_installed.rc == 0 %}installed{% else %}not installed{% endif %}
+          {% if elasticsearch_status is defined %}
+          Service: {{ elasticsearch_status.status.ActiveState }}
+          {% endif %}
+      when: check_elasticsearch | default(true)
+    
+    - name: Check if Logstash is installed
+      ansible.builtin.command: pacman -Q logstash-bin 2>/dev/null || pacman -Q logstash 2>/dev/null
+      register: logstash_installed
+      changed_when: false
+      failed_when: false
+      when: check_logstash | default(true)
+    
+    - name: Verify Logstash service status
+      ansible.builtin.systemd:
+        name: logstash
+        state: started
+      register: logstash_status
+      when:
+        - check_logstash | default(true)
+        - logstash_installed.rc == 0
+    
+    - name: Display Logstash status
+      ansible.builtin.debug:
+        msg: |
+          Logstash: {% if logstash_installed.rc == 0 %}installed{% else %}not installed{% endif %}
+          {% if logstash_status is defined %}
+          Service: {{ logstash_status.status.ActiveState }}
+          {% endif %}
+      when: check_logstash | default(true)
+    
+    - name: Check if Kibana is installed
+      ansible.builtin.command: pacman -Q kibana-bin 2>/dev/null || pacman -Q kibana 2>/dev/null
+      register: kibana_installed
+      changed_when: false
+      failed_when: false
+      when: check_kibana | default(true)
+    
+    - name: Verify Kibana service status
+      ansible.builtin.systemd:
+        name: kibana
+        state: started
+      register: kibana_status
+      when:
+        - check_kibana | default(true)
+        - kibana_installed.rc == 0
+    
+    - name: Display Kibana status
+      ansible.builtin.debug:
+        msg: |
+          Kibana: {% if kibana_installed.rc == 0 %}installed{% else %}not installed{% endif %}
+          {% if kibana_status is defined %}
+          Service: {{ kibana_status.status.ActiveState }}
+          {% else %}
+          Note: Kibana installation has known issues (PKGBUILD bug)
+          {% endif %}
+      when: check_kibana | default(true)
+    
+    - name: Verification Summary
+      ansible.builtin.debug:
+        msg: |
+          ==========================================
+          Elastic Stack Verification Summary
+          ==========================================
+          
+          Elasticsearch: {% if check_elasticsearch | default(true) %}{% if elasticsearch_installed.rc == 0 %}✓ Installed{% else %}✗ Not Installed{% endif %}{% else %}Skipped{% endif %}
+          Logstash: {% if check_logstash | default(true) %}{% if logstash_installed.rc == 0 %}✓ Installed{% else %}✗ Not Installed{% endif %}{% else %}Skipped{% endif %}
+          Kibana: {% if check_kibana | default(true) %}{% if kibana_installed.rc == 0 %}✓ Installed{% else %}✗ Not Installed{% endif %}{% else %}Skipped{% endif %}
+          
+          ==========================================
+      
+    - name: Fail if critical services are missing
+      ansible.builtin.fail:
+        msg: "Critical services verification failed"
+      when:
+        - (check_elasticsearch | default(true) and elasticsearch_installed.rc != 0) or
+          (check_logstash | default(true) and logstash_installed.rc != 0)

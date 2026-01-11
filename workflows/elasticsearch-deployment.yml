@@ -1,0 +1,112 @@
+---
+# StackWeaver Workflow Template
+# This workflow demonstrates a multi-step deployment process
+# combining infrastructure provisioning and application deployment
+
+name: "Elastic Stack Deployment"
+description: "Deploys Elastic Stack on Arch Linux using Ansible"
+
+version: "1.0.0"
+
+steps:
+  - name: "Validate Environment"
+    type: "validation"
+    timeout: 300
+    enabled: true
+    config:
+      checks:
+        - check_ansible_available
+        - check_inventory_valid
+
+  - name: "Deploy Elasticsearch"
+    type: "ansible"
+    timeout: 7200  # 2 hours for AUR builds
+    enabled: true
+    config:
+      playbook: "ansible-examples/playbooks/elasticsearch.yml"
+      inventory: "ansible-examples/inventory/test.ini"
+      extra_vars:
+        elasticsearch_version: "8"
+        logstash_version: "8"
+        kibana_version: "8"
+      become: true
+      become_method: sudo
+    
+    on_success:
+      - step: "Verify Services"
+    on_failure:
+      - step: "Cleanup on Failure"
+      - notify: "deployment_failed"
+
+  - name: "Verify Services"
+    type: "ansible"
+    timeout: 600
+    enabled: true
+    config:
+      playbook: "ansible-examples/playbooks/verify-services.yml"
+      inventory: "ansible-examples/inventory/test.ini"
+      extra_vars:
+        check_elasticsearch: true
+        check_logstash: true
+        check_kibana: false  # Known issue with Kibana
+    
+    on_success:
+      - notify: "deployment_success"
+    on_failure:
+      - step: "Troubleshoot Services"
+
+  - name: "Troubleshoot Services"
+    type: "ansible"
+    timeout: 600
+    enabled: false  # Manual step, can be enabled for debugging
+    config:
+      playbook: "ansible-examples/playbooks/troubleshoot.yml"
+      inventory: "ansible-examples/inventory/test.ini"
+
+  - name: "Cleanup on Failure"
+    type: "ansible"
+    timeout: 300
+    enabled: true
+    config:
+      playbook: "ansible-examples/playbooks/cleanup.yml"
+      inventory: "ansible-examples/inventory/test.ini"
+      extra_vars:
+        remove_packages: false  # Keep packages for debugging
+
+notifications:
+  deployment_success:
+    type: "webhook"
+    url: "${WEBHOOK_URL}/deployment/success"
+    method: "POST"
+  
+  deployment_failed:
+    type: "webhook"
+    url: "${WEBHOOK_URL}/deployment/failed"
+    method: "POST"
+
+variables:
+  - name: "elasticsearch_version"
+    type: "string"
+    default: "8"
+    description: "Elasticsearch version to install"
+  
+  - name: "logstash_version"
+    type: "string"
+    default: "8"
+    description: "Logstash version to install"
+  
+  - name: "kibana_version"
+    type: "string"
+    default: "8"
+    description: "Kibana version to install"
+  
+  - name: "aur_user"
+    type: "string"
+    default: "aur"
+    description: "User to use for AUR builds"
+
+tags:
+  - "elasticsearch"
+  - "ansible"
+  - "deployment"
+  - "arch-linux"

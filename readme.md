@@ -47,6 +47,18 @@ ansible/
 
 ---
 
+### Workflow Templates
+
+The `workflows/` directory contains workflow templates for testing StackWeaver's workflow orchestration capabilities (separate from Ansible workflows).
+
+| Workflow | Description |
+|----------|-------------|
+| `workflows/elasticsearch-deployment.yml` | Multi-step workflow deploying Elastic Stack on Arch Linux |
+
+See [workflows/README.md](workflows/README.md) for StackWeaver-specific workflow testing.
+
+---
+
 ## Terraform Testing
 
 Stackweaver aims to be fully TFE compliant, meaning the TFE provider can be used just as in Terraform Enterprise.
