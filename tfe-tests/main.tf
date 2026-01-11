@@ -89,7 +89,7 @@ resource "tfe_organization_membership" "test_member_yassin_admin" {
   organization = var.organization
 }
 
-resource "tfe_organization_membership" "test_member_yassin_admin" {
+resource "tfe_organization_membership" "test_member_1" {
   email        = "test1@vhco.pro"
   organization = "test"
 }
