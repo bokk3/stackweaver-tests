@@ -130,3 +130,4 @@ resource "tfe_team_organization_members" "test_team_members_1" {
     tfe_organization_membership.test_member_1_team.id,
   ]
 }
+
