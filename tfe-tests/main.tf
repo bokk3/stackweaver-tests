@@ -121,6 +121,7 @@ resource "tfe_organization_membership" "test_member_1_team" {
 }
 
 
+
 // Add multiple members to the team at once
 resource "tfe_team_organization_members" "test_team_members_1" {
   team_id = tfe_team.test_team_1.id
@@ -129,3 +130,13 @@ resource "tfe_team_organization_members" "test_team_members_1" {
     tfe_organization_membership.test_member_1_team.id,
   ]
 }
+
+
+
+
+
+
+
+
+
+
