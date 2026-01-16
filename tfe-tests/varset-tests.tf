@@ -1,22 +1,10 @@
-variable "organization_name" {
-  description = "Organization name for testing"
-  type        = string
-  default     = "test-org"
-}
-
-variable "workspace_name" {
-  description = "Workspace name for testing"
-  type        = string
-  default     = "test-workspace"
-}
-
 # Test 1: Create a basic variable set (organization-owned, non-priority)
 resource "tfe_variable_set" "basic" {
   name         = "test-basic-varset"
   description  = "Basic variable set for testing"
   global       = false
   priority     = false
-  organization = var.organization_name
+  organization = var.organization
 }
 
 # Test 2: Create a priority variable set (organization-owned)
@@ -25,7 +13,7 @@ resource "tfe_variable_set" "priority" {
   description  = "Priority variable set for testing"
   global       = true
   priority     = true
-  organization = var.organization_name
+  organization = var.organization
 }
 
 # Test 3: Create a variable set with parent relationship (organization)
@@ -34,7 +22,7 @@ resource "tfe_variable_set" "org_parent" {
   description  = "Variable set with organization parent"
   global       = true
   priority     = false
-  organization = var.organization_name
+  organization = var.organization
 }
 
 # Test 4: Create variables in the basic variable set
@@ -69,7 +57,7 @@ resource "tfe_variable" "priority_var1" {
 # Test 6: Assign variable set to workspace
 resource "tfe_workspace_variable_set" "basic_workspace" {
   variable_set_id = tfe_variable_set.basic.id
-  workspace_id    = var.workspace_name
+  workspace_id    = "ws-1q0HQPrGm4Yf1q0H"
 }
 
 # Test 7: Create a workspace variable (should override non-priority variable sets)
@@ -111,7 +99,7 @@ resource "tfe_variable_set" "updatable" {
   description  = "Variable set for testing updates"
   global       = false
   priority     = false
-  organization = var.organization_name
+  organization = var.organization
 }
 
 # Outputs for verification
